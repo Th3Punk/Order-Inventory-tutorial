@@ -8,27 +8,27 @@
 
 ## Tartalomjegyzék
 
-1. [Projektkoncepció és architektúra](#projektkoncepció-és-architektúra)  
-2. [A tanulási célok térképe](#a-tanulási-célok-térképe)  
-3. [Repo struktúra és alapelvek](#repo-struktúra-és-alapelvek)  
-4. [Docker Compose “baseline” – minden komponens konténerben](#docker-compose-baseline--minden-komponens-konténerben)  
-5. [Lépésről lépésre roadmap](#lépésről-lépésre-roadmap)  
-   - 5.1 [00 – Környezet és toolchain](#00--környezet-és-toolchain)  
-   - 5.2 [01 – Postgres + Alembic migrációk](#01--postgres--alembic-migrációk)  
-   - 5.3 [02 – FastAPI skeleton, healthcheck, strukturált logging](#02--fastapi-skeleton-healthcheck-strukturált-logging)  
-   - 5.4 [03 – Auth: JWT (access+refresh), password hashing, RBAC alapok](#03--auth-jwt-accessrefresh-password-hashing-rbac-alapok)  
-   - 5.5 [04 – CRUD (Orders) + validáció + hibakezelés](#04--crud-orders--validáció--hibakezelés)  
-   - 5.6 [05 – Redis: cache + rate limit + session jellegű minta](#05--redis-cache--rate-limit--session-jellegű-minta)  
-   - 5.7 [06 – Kafka: topicok, producer/consumer, schema‑gondolkodás](#06--kafka-topicok-producerconsumer-schemagondolkodás)  
-   - 5.8 [07 – Outbox pattern Postgresben (megbízható event publikálás)](#07--outbox-pattern-postgresben-megbízható-event-publikálás)  
-   - 5.9 [08 – Flink: stream job, aggregáció, state, checkpointing](#08--flink-stream-job-aggregáció-state-checkpointing)  
-   - 5.10 [09 – NoSQL: MongoDB mint “read model” / audit store](#09--nosql-mongodb-mint-read-model--audit-store)  
-   - 5.11 [10 – React+Vite + shadcn/ui: auth flow, forms, table](#10--reactvite--shadcnui-auth-flow-forms-table)  
-   - 5.12 [11 – Observability: metrics, tracing (opcionális), log korreláció](#11--observability-metrics-tracing-opcionális-log-korreláció)  
-   - 5.13 [12 – Biztonsági “hardening” és threat modeling mini‑gyakorlat](#12--biztonsági-hardening-és-threat-modeling-minigyakorlat)  
-   - 5.14 [13 – E2E ellenőrző script + “definition of done”](#13--e2e-ellenőrző-script--definition-of-done)  
-6. [Gyakori hibák és debug checklist](#gyakori-hibák-és-debug-checklist)  
-7. [Továbbfejlesztési ötletek](#továbbfejlesztési-ötletek)  
+1. [Projektkoncepció és architektúra](#projektkoncepció-és-architektúra)
+2. [A tanulási célok térképe](#a-tanulási-célok-térképe)
+3. [Repo struktúra és alapelvek](#repo-struktúra-és-alapelvek)
+4. [Docker Compose “baseline” – minden komponens konténerben](#docker-compose-baseline--minden-komponens-konténerben)
+5. [Lépésről lépésre roadmap](#lépésről-lépésre-roadmap)
+   - 5.1 [00 – Környezet és toolchain](#00--környezet-és-toolchain)
+   - 5.2 [01 – Postgres + Alembic migrációk](#01--postgres--alembic-migrációk)
+   - 5.3 [02 – FastAPI skeleton, healthcheck, strukturált logging](#02--fastapi-skeleton-healthcheck-strukturált-logging)
+   - 5.4 [03 – Auth: JWT (access+refresh), password hashing, RBAC alapok](#03--auth-jwt-accessrefresh-password-hashing-rbac-alapok)
+   - 5.5 [04 – CRUD (Orders) + validáció + hibakezelés](#04--crud-orders--validáció--hibakezelés)
+   - 5.6 [05 – Redis: cache + rate limit + session jellegű minta](#05--redis-cache--rate-limit--session-jellegű-minta)
+   - 5.7 [06 – Kafka: topicok, producer/consumer, schema‑gondolkodás](#06--kafka-topicok-producerconsumer-schemagondolkodás)
+   - 5.8 [07 – Outbox pattern Postgresben (megbízható event publikálás)](#07--outbox-pattern-postgresben-megbízható-event-publikálás)
+   - 5.9 [08 – Flink: stream job, aggregáció, state, checkpointing](#08--flink-stream-job-aggregáció-state-checkpointing)
+   - 5.10 [09 – NoSQL: MongoDB mint “read model” / audit store](#09--nosql-mongodb-mint-read-model--audit-store)
+   - 5.11 [10 – React+Vite + shadcn/ui: auth flow, forms, table](#10--reactvite--shadcnui-auth-flow-forms-table)
+   - 5.12 [11 – Observability: metrics, tracing (opcionális), log korreláció](#11--observability-metrics-tracing-opcionális-log-korreláció)
+   - 5.13 [12 – Biztonsági “hardening” és threat modeling mini‑gyakorlat](#12--biztonsági-hardening-és-threat-modeling-minigyakorlat)
+   - 5.14 [13 – E2E ellenőrző script + “definition of done”](#13--e2e-ellenőrző-script--definition-of-done)
+6. [Gyakori hibák és debug checklist](#gyakori-hibák-és-debug-checklist)
+7. [Továbbfejlesztési ötletek](#továbbfejlesztési-ötletek)
 
 ---
 
@@ -51,7 +51,7 @@
 - `web` – React/Vite UI
 - infrastruktúra konténerek: Postgres, Redis, Kafka (KRaft), Flink (jobmanager/taskmanager), MongoDB
 
-> Miért jó tanuláshoz?  
+> Miért jó tanuláshoz?
 > Minden komponens “tipikus”:
 > - Postgres + Alembic: migráció és tranzakciók
 > - FastAPI: modern async API, Pydantic v2, auth

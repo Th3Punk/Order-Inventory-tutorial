@@ -1,35 +1,35 @@
-# Tanuló projekt: Event-Driven “Order & Inventory” platform  
+# Tanuló projekt: Event-Driven “Order & Inventory” platform
 **FastAPI + Kafka + Flink + Redis + PostgreSQL + MongoDB + React/Vite + shadcn/ui + Docker Compose**
 
-> **Cél:** egy kicsi, de ipari jellegű (event-driven) rendszer felépítése **sok apró lépésben**, úgy, hogy közben megértsd a felsorolt komponensek **gyakori használati eseteit** és a **biztonságos implementáció** alapelveit.  
+> **Cél:** egy kicsi, de ipari jellegű (event-driven) rendszer felépítése **sok apró lépésben**, úgy, hogy közben megértsd a felsorolt komponensek **gyakori használati eseteit** és a **biztonságos implementáció** alapelveit.
 > **Nem kész kód**: a dokumentum specifikációt, döntéseket, ellenőrzési pontokat és minimál snippeteket ad. A kódot te írod.
 
 ---
 
 ## Tartalomjegyzék
 
-1. [Projektkoncepció és célok](#projektkoncepció-és-célok)  
-2. [Architektúra és adatfolyam](#architektúra-és-adatfolyam)  
-3. [Végpontok, események, read model – specifikáció](#végpontok-események-read-model--specifikáció)  
-4. [Repo struktúra és konvenciók](#repo-struktúra-és-konvenciók)  
-5. [Docker Compose baseline](#docker-compose-baseline)  
-6. [Roadmap lépésről lépésre](#roadmap-lépésről-lépésre)  
-   - [00 – Toolchain, minőségkapuk](#00--toolchain-minőségkapuk)  
-   - [01 – PostgreSQL + Alembic + DB sémák](#01--postgresql--alembic--db-sémák)  
-   - [02 – FastAPI skeleton + config + logging](#02--fastapi-skeleton--config--logging)  
-   - [03 – Auth: JWT access+refresh, RBAC](#03--auth-jwt-accessrefresh-rbac)  
-   - [04 – Orders API: CRUD + idempotencia + outbox írás](#04--orders-api-crud--idempotencia--outbox-írás)  
-   - [05 – Redis: cache-aside + rate limit + token revoke minta](#05--redis-cache-aside--rate-limit--token-revoke-minta)  
-   - [06 – Kafka: topicok, producer/consumer, DLQ](#06--kafka-topicok-producerconsumer-dlq)  
-   - [07 – Outbox worker: poll, publish, retry](#07--outbox-worker-poll-publish-retry)  
-   - [08 – Flink: stream feldolgozás + window + state + checkpoint](#08--flink-stream-feldolgozás--window--state--checkpoint)  
-   - [09 – MongoDB: audit + read model + upsert](#09--mongodb-audit--read-model--upsert)  
-   - [10 – React/Vite + shadcn/ui: auth flow + táblák + űrlapok](#10--reactvite--shadcnui-auth-flow--táblák--űrlapok)  
-   - [11 – Observability: metrics + UI-k](#11--observability-metrics--ui-k)  
-   - [12 – Security hardening + threat modeling](#12--security-hardening--threat-modeling)  
-   - [13 – E2E ellenőrzés: seed + check script](#13--e2e-ellenőrzés-seed--check-script)  
-7. [Gyakori hibák / debug checklist](#gyakori-hibák--debug-checklist)  
-8. [Továbbfejlesztések](#továbbfejlesztések)  
+1. [Projektkoncepció és célok](#projektkoncepció-és-célok)
+2. [Architektúra és adatfolyam](#architektúra-és-adatfolyam)
+3. [Végpontok, események, read model – specifikáció](#végpontok-események-read-model--specifikáció)
+4. [Repo struktúra és konvenciók](#repo-struktúra-és-konvenciók)
+5. [Docker Compose baseline](#docker-compose-baseline)
+6. [Roadmap lépésről lépésre](#roadmap-lépésről-lépésre)
+   - [00 – Toolchain, minőségkapuk](#00--toolchain-minőségkapuk)
+   - [01 – PostgreSQL + Alembic + DB sémák](#01--postgresql--alembic--db-sémák)
+   - [02 – FastAPI skeleton + config + logging](#02--fastapi-skeleton--config--logging)
+   - [03 – Auth: JWT access+refresh, RBAC](#03--auth-jwt-accessrefresh-rbac)
+   - [04 – Orders API: CRUD + idempotencia + outbox írás](#04--orders-api-crud--idempotencia--outbox-írás)
+   - [05 – Redis: cache-aside + rate limit + token revoke minta](#05--redis-cache-aside--rate-limit--token-revoke-minta)
+   - [06 – Kafka: topicok, producer/consumer, DLQ](#06--kafka-topicok-producerconsumer-dlq)
+   - [07 – Outbox worker: poll, publish, retry](#07--outbox-worker-poll-publish-retry)
+   - [08 – Flink: stream feldolgozás + window + state + checkpoint](#08--flink-stream-feldolgozás--window--state--checkpoint)
+   - [09 – MongoDB: audit + read model + upsert](#09--mongodb-audit--read-model--upsert)
+   - [10 – React/Vite + shadcn/ui: auth flow + táblák + űrlapok](#10--reactvite--shadcnui-auth-flow--táblák--űrlapok)
+   - [11 – Observability: metrics + UI-k](#11--observability-metrics--ui-k)
+   - [12 – Security hardening + threat modeling](#12--security-hardening--threat-modeling)
+   - [13 – E2E ellenőrzés: seed + check script](#13--e2e-ellenőrzés-seed--check-script)
+7. [Gyakori hibák / debug checklist](#gyakori-hibák--debug-checklist)
+8. [Továbbfejlesztések](#továbbfejlesztések)
 
 ---
 
@@ -139,7 +139,7 @@ Ez a fejezet “single source of truth” a projekt implementációjához.
 - Ha cookie: üres body, refresh token cookieból
 - Ha JSON: `{ "refresh_token": "..." }` (dev egyszerűség)
 
-**Response (200)**: új token pair  
+**Response (200)**: új token pair
 **Validáció**
 - refresh token létezik, nem revoked, nem expired
 - one-time use: refresh siker után régi refresh érvénytelenít
@@ -166,7 +166,7 @@ Ez a fejezet “single source of truth” a projekt implementációjához.
 
 #### `POST /orders`
 **Kötelező: idempotencia**
-- Header: `Idempotency-Key: <uuid>`  
+- Header: `Idempotency-Key: <uuid>`
 - Tárolás: Postgres tábla `idempotency_keys` (user_id + key unique) vagy orders táblában mező.
 
 **Request JSON**
@@ -259,7 +259,7 @@ Ez a fejezet “single source of truth” a projekt implementációjához.
 
 ### 3) Kafka események
 
-Topic: `orders.events`  
+Topic: `orders.events`
 Key: `order_id` (uuid string)
 
 #### Event envelope (javasolt)
@@ -297,7 +297,7 @@ Key: `order_id` (uuid string)
 - required field ellenőrzés
 - ismeretlen event_type -> DLQ
 
-Topic: `orders.dlq`  
+Topic: `orders.dlq`
 - ide kerül a hibás event, plusz `error_reason`
 
 ---
@@ -741,7 +741,7 @@ Stateful stream processing gyakorlat.
 - aggregate: sum qty, sum revenue
 
 #### Output
-Opció A (egyszerű): Kafka sink `orders.sku-stats`  
+Opció A (egyszerű): Kafka sink `orders.sku-stats`
 Opció B (komplettebb): MongoDB sink (upsert)
 
 Javaslat tanuláshoz: **A majd B**:
