@@ -13,6 +13,8 @@ WORKDIR /app
 
 COPY --from=builder /app/.venv /app/.venv
 COPY app ./app
+COPY alembic.ini ./alembic.ini
+COPY alembic ./alembic
 
 ENV PATH="/app/.venv/bin:$PATH"
 

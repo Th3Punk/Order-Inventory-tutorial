@@ -12,3 +12,9 @@ compose:
 
 compose-containers containers:
     docker-compose -f infra/docker-compose.yml up -d --build {{containers}}
+
+alembic-revision message:
+    PYTHONPATH=apps/api alembic -c apps/api/alembic.ini revision -m "{{message}}" --autogenerate
+
+migrate:
+  docker compose -f infra/docker-compose.yml run --rm api alembic upgrade head
