@@ -12,7 +12,7 @@ class User(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,
-        default=uuid.uuid4,
+        server_default=text("gen_random_uuid()"),
     )
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
@@ -24,6 +24,6 @@ class User(Base):
     )
 
     __table_args__ = (
-        Index("ix_user_email", "email", unique=True),
+        Index("ix_user_email", "email"),
         CheckConstraint("role IN ('admin', 'user')", name="ck_user_role_valid"),
     )
