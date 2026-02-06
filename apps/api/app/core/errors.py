@@ -10,7 +10,7 @@ def error_response(request: Request, code: str, message: str, status_code: int) 
             "error": {
                 "code": code,
                 "message": message,
-                "request_id": request.headers.get("X-Request-Id"),
+                "request_id": getattr(request.state, "request_id", None),
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             }
         },
