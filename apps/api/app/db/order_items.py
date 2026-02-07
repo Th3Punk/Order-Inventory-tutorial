@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy import ForeignKey, String, BigInteger, Integer, Index, text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
@@ -20,6 +20,8 @@ class OrderItem(Base):
     sku: Mapped[str] = mapped_column(String, nullable=False)
     qty: Mapped[int] = mapped_column(Integer, nullable=False)
     unit_price: Mapped[int] = mapped_column(BigInteger, nullable=False)
+
+    order = relationship("Order", back_populates="items")
 
     __table_args__ = (
         Index("ix_order_items_order_id", "order_id"),

@@ -31,6 +31,8 @@ async def register_user(db: AsyncSession, email: str, password: str, role: str =
 
     password_hash = hash_password(password)
     user = await auth_repository.create_user(db, email=email, password_hash=password_hash, role=role)
+    await db.commit()
+    await db.refresh(user)
     return {"id": str(user.id), "email": user.email, "role": user.role}
 
 
@@ -49,6 +51,7 @@ async def login_user(db: AsyncSession, email: str, password: str) -> TokenRespon
         token_hash=hash_refresh_token(refresh_token),
         expires_at=get_refresh_expiry(),
     )
+    await db.commit()
 
     return TokenResponse(
         access_token=access_token,
@@ -66,8 +69,8 @@ async def refresh_tokens(db: AsyncSession, refresh_token: str) -> TokenResponse:
         raise ValueError("Invalid refresh token")
 
     await auth_repository.revoke_refresh_token(db, token_hash)
-
     user = await auth_repository.get_user_by_id(db, user_id=str(rt.user_id))
+
     if not user:
         raise ValueError("User not found")
     access_token = create_access_token(subject=str(user.id), role=user.role)
@@ -79,6 +82,7 @@ async def refresh_tokens(db: AsyncSession, refresh_token: str) -> TokenResponse:
         token_hash=hash_refresh_token(new_refresh_token),
         expires_at=get_refresh_expiry(),
     )
+    await db.commit()
 
     return TokenResponse(
         access_token=access_token,
@@ -91,3 +95,4 @@ async def refresh_tokens(db: AsyncSession, refresh_token: str) -> TokenResponse:
 async def logout(db: AsyncSession, refresh_token: str) -> None:
     token_hash = hash_refresh_token(refresh_token)
     await auth_repository.revoke_refresh_token(db, token_hash)
+    await db.commit()
