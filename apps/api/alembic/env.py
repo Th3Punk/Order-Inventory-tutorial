@@ -13,7 +13,11 @@ target_metadata = Base.metadata
 
 
 def get_url() -> str:
-    return os.environ.get("DATABASE_URL", "postgresql://tutorial:tutorial@localhost:5433/tutorial")
+    url = os.environ.get("DATABASE_URL", "postgresql://tutorial:tutorial@localhost:5433/tutorial")
+    # Alembic runs sync; swap async driver to sync if needed.
+    if "+asyncpg" in url:
+        return url.replace("+asyncpg", "+psycopg")
+    return url
 
 
 def run_migrations_online() -> None:

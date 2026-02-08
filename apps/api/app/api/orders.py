@@ -6,6 +6,8 @@ from app.schemas.orders import CreateOrderRequest, OrderItemResponse, OrderListR
 from app.schemas.order_status import UpdateOrderStatusRequest
 from app.services import orders_service
 from app.api.deps import get_current_user, require_role
+from app.cache.redis_client import redis
+from app.cache.order_cache import get_cached_order, set_cached_order, invalidate_order
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -66,6 +68,10 @@ async def list_orders(
 
 @router.get("/{order_id}", response_model=OrderResponse)
 async def get_order(order_id: str, db: AsyncSession = Depends(get_db), user: dict = Depends(get_current_user)):
+    cached = await get_cached_order(redis, order_id)
+    if cached:
+        return cached
+
     order = await orders_service.get_order_detail(db, user["sub"], order_id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -79,7 +85,7 @@ async def get_order(order_id: str, db: AsyncSession = Depends(get_db), user: dic
         )
         for i in order.items
     ]
-    return OrderResponse(
+    response = OrderResponse(
         id=str(order.id),
         status=order.status,
         currency=order.currency,
@@ -87,6 +93,9 @@ async def get_order(order_id: str, db: AsyncSession = Depends(get_db), user: dic
         items=items,
         created_at=order.created_at.isoformat(),
     )
+
+    await set_cached_order(redis, order_id, response.model_dump(), ttl_seconds=60)
+    return response
 
 
 @router.patch("/{order_id}/status", response_model=OrderResponse)
@@ -105,6 +114,8 @@ async def update_status(
         )
     except ValueError:
         raise HTTPException(status_code=409, detail="Invalid status transition")
+
+    await invalidate_order(redis, order_id)
 
     return OrderResponse(
         id=str(order.id),

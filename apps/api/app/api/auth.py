@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, UserResponse
 from app.services import auth_service
 from app.db.deps import get_db
+from app.cache.redis_client import redis
+from app.cache.rate_limit import check_login_rate
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -18,7 +20,12 @@ async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(data: LoginRequest, response: Response, db: AsyncSession = Depends(get_db)):
+async def login(data: LoginRequest, request: Request, response: Response, db: AsyncSession = Depends(get_db)):
+    try:
+        client_ip = request.client.host if request.client else "unknown"
+        await check_login_rate(redis, client_ip)
+    except ValueError:
+        raise HTTPException(status_code=429, detail="Too many requests")
     try:
         tokens = await auth_service.login_user(db, data.email, data.password)
     except ValueError:
