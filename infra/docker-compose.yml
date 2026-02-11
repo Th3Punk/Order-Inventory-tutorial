@@ -50,6 +50,35 @@ services:
     ports:
       - "8085:8080"
 
+  jobmanager:
+    build:
+      context: ../apps/stream-job
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        python.executable: /opt/stream-job/.venv/bin/python
+        python.client.executable: /opt/stream-job/.venv/bin/python
+
+
+  taskmanager:
+    build:
+      context: ../apps/stream-job
+      dockerfile: Dockerfile
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        python.executable: /opt/stream-job/.venv/bin/python
+        python.client.executable: /opt/stream-job/.venv/bin/python
+        taskmanager.numberOfTaskSlots: 2
+
+
   api:
     build:
       context: ../apps/api
@@ -62,15 +91,19 @@ services:
       - db
       - redis
 
-  outbox-worker:
+  stream-job:
     build:
-      context: ../apps/outbox-worker
+      context: ../apps/stream-job
       dockerfile: Dockerfile
-    env_file:
-      - ./.env.outbox-worker
     depends_on:
-      - db
-      - kafka
+      - jobmanager
+      - taskmanager
+    command: >
+      sh -c "until curl -sf http://jobmanager:8081/ > /dev/null; do sleep 2; done;
+      flink run -m jobmanager:8081 -py /opt/stream-job/app/job.py
+      -pyexec /opt/stream-job/.venv/bin/python
+      -pyclientexec /opt/stream-job/.venv/bin/python"
+
 
 volumes:
   postgres_data:

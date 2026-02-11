@@ -10,6 +10,9 @@ api-add pkg:
 worker-add pkg:
     uv add --project apps/outbox-worker {{pkg}}
 
+flink-add pkg:
+    uv add --project apps/stream-job {{pkg}}
+
 compose:
     docker-compose -f infra/docker-compose.yml up -d --build
 
