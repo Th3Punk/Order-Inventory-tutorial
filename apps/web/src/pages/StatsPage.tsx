@@ -42,6 +42,19 @@ const StatsPage = () => {
     loadStats();
   }, []);
 
+  const applyRangeMinutes = (minutes: number) => {
+    const now = new Date();
+    const from = new Date(now.getTime() - minutes * 60 * 1000);
+    setFromTs(from.toISOString().slice(0, 16));
+    setToTs(now.toISOString().slice(0, 16));
+  };
+
+  const clearFilters = () => {
+    setFromTs("");
+    setToTs("");
+    loadStats();
+  };
+
   return (
     <main className="page">
       <div className="card">
@@ -66,6 +79,20 @@ const StatsPage = () => {
           <button type="button" onClick={loadStats} disabled={loading}>
             {loading ? "Loading..." : "Apply"}
           </button>
+          <button type="button" onClick={clearFilters} disabled={loading}>
+            Clear
+          </button>
+        </div>
+        <div className="quick-filters">
+          <button type="button" onClick={() => applyRangeMinutes(15)}>
+            Last 15m
+          </button>
+          <button type="button" onClick={() => applyRangeMinutes(60)}>
+            Last 1h
+          </button>
+          <button type="button" onClick={() => applyRangeMinutes(60 * 24)}>
+            Last 24h
+          </button>
         </div>
         {loading ? <p>Loading...</p> : null}
         {error ? <p className="error">{error}</p> : null}
@@ -89,7 +116,7 @@ const StatsPage = () => {
             ))}
             {items.length === 0 && !loading ? (
               <tr>
-                <td colSpan={4}>No stats</td>
+                <td colSpan={4}>No stats in the selected range</td>
               </tr>
             ) : null}
           </tbody>

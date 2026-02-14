@@ -66,6 +66,9 @@ const OrdersPage = () => {
               <option value="canceled">canceled</option>
             </select>
           </label>
+          <button type="button" onClick={() => loadOrders(null, status)} disabled={loading}>
+            {loading ? "Loading..." : "Refresh"}
+          </button>
         </div>
         {error ? <p className="error">{error}</p> : null}
         <table className="table">
