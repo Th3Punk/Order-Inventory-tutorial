@@ -53,7 +53,19 @@ async def create_order_with_outbox(db: AsyncSession, user_id: str, idempotency_k
         aggregate_type="order",
         aggregate_id=order.id,
         event_type="OrderCreated",
-        payload_json={"order_id": str(order.id)},
+        payload_json={
+            "order_id": str(order.id),
+            "currency": currency,
+            "total_amount": total,
+            "items": [
+                {
+                    "sku": item.sku,
+                    "qty": item.qty,
+                    "unit_price": item.unit_price,
+                }
+                for item in items
+            ],
+        },
         created_at=datetime.now(timezone.utc),
     )
 

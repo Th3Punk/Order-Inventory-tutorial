@@ -15,4 +15,5 @@ dependencies = [
     "asyncpg>=0.31.0",
     "redis>=7.1.0",
     "confluent-kafka>=2.13.0",
+    "pymongo>=4.11.0",
 ]

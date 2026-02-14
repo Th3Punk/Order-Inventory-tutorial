@@ -24,3 +24,6 @@ alembic-revision message:
 
 migrate:
   docker compose -f infra/docker-compose.yml run --rm api alembic upgrade head
+
+test-event:
+    docker compose -f infra/docker-compose.yml exec -T kafka bash -lc "printf '%s\n' '{\"event_type\":\"OrderCreated\",\"aggregate_id\":\"debug-1\",\"payload\":{\"items\":[{\"sku\":\"SKU-001\",\"qty\":2},{\"sku\":\"SKU-002\",\"qty\":1}]},\"created_at\":\"2026-02-11T18:30:00Z\"}' | /usr/bin/kafka-console-producer --bootstrap-server kafka:9092 --topic orders.events"

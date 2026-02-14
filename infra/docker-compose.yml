@@ -50,6 +50,25 @@ services:
     ports:
       - "8085:8080"
 
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  mongo-express:
+    image: mongo-express:1.0.2-20
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    ports:
+      - "8086:8081"
+
   jobmanager:
     build:
       context: ../apps/stream-job
@@ -104,7 +123,18 @@ services:
       -pyexec /opt/stream-job/.venv/bin/python
       -pyclientexec /opt/stream-job/.venv/bin/python"
 
+  mongo-writer:
+    build:
+      context: ../apps/mongo-writer
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env.mongo-writer
+    depends_on:
+      - kafka
+      - mongodb
+
 
 volumes:
   postgres_data:
   redis_data:
+  mongo_data:

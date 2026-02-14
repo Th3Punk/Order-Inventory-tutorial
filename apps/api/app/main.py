@@ -8,6 +8,7 @@ from app.core.errors import error_response
 from app.api.health import router as health_router
 from app.api.auth import router as auth_router
 from app.api.orders import router as orders_router
+from app.api.stats import router as stats_router
 
 
 def create_app() -> FastAPI:
@@ -35,6 +36,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(auth_router)
     app.include_router(orders_router)
+    app.include_router(stats_router)
 
     return app
 

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5173"]
     env: str = "production"
     kafka_bootstrap_servers: str
+    mongo_url: str | None = None
 
 
 settings = Settings()  # type: ignore[call-arg]
